@@ -1,6 +1,8 @@
 require("dotenv").config()
 const express = require("express")
+const cors = require("cors")
 const {Army,Battle} = require("./model")
+const {Server} = require("socket.io")
 
 const app = express()
 
@@ -9,13 +11,26 @@ const PORT = process.env.PORT || 5000
 
 app.use(express.json());
 app.use(express.urlencoded());
+app.use(cors())
+
+
+
+const appServer = app.listen(PORT,()=>{
+    console.log("Service is running")
+})
+
+const io = new Server(appServer,{
+    cors:{
+      origin: ["https://localhost:3000"]
+    }
+  })
 
 app.post("/add-battle", async(req,res)=>{
-    console.log(req.body)
     const { name } = req.body || {}
     if(name){
         const [battle,created] = await Battle.findOrCreate({where:{name},defaults:{name}})
         if(created){
+            io.sockets.emit("battle_created",battle)
             res.status(200).json({message:"Battle created!", status:true,data:battle})
         }else{
             res.status(200).json({message:"Battle with name already exist", status:false})
@@ -60,6 +75,7 @@ app.post("/add-army",async(req,res)=>{
                 if(isBattleNotStarted){
                     const [army,created] = await Army.findOrCreate({where:{name,strategy},defaults:{name,unit,strategy,battleId}})
                     if(created){
+                        io.sockets.emit("army_created",army)
                         res.status(200).json({message:"Army added successfully", status:true,data:army})
                     }else{
                         res.status(200).json({message:"Army with strategy already exists", status:false})
@@ -77,6 +93,16 @@ app.post("/add-army",async(req,res)=>{
     }   
 })
 
+app.get("/armies/:id",async(req,res)=>{
+    const {id} = req.params || {}
+    if(id){
+        const army = await Army.findAll({where:{battleId:id}})
+        res.status(200).json({message:"Armies retrieved", status:true, data:army})
+    }else{
+        res.status(200).json({message:"You must provide battle id", status:false})
+    }
+})
+
 
 app.put("/start-battle/:id",async(req,res)=>{
     const id = req.params?.id
@@ -85,6 +111,7 @@ app.put("/start-battle/:id",async(req,res)=>{
         if(countArmy ===3){
             const [battle] = await Battle.update({status:true},{where:{id}})
             if(battle){
+                io.sockets.emit("battleStarted",id)
                 res.status(200).json({message:"Battle started", status:true}) 
             }else{
 
@@ -124,6 +151,18 @@ app.put("/reset-battle/:id",async(req,res)=>{
 
 
 
-app.listen(PORT,()=>{
-    console.log("Service is running")
-})
+    
+  
+    
+    io.on("connection", async(socket) => {
+       
+         
+            io.emit("welcome",`${fullName} joined`)
+    
+            socket.on("send_comment",(msg)=>{
+                io.emit("receive_message",{comment:msg,user:fullName})
+            })
+        
+       
+    
+    });
