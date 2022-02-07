@@ -152,17 +152,3 @@ app.put("/reset-battle/:id",async(req,res)=>{
 
 
     
-  
-    
-    io.on("connection", async(socket) => {
-       
-         
-            io.emit("welcome",`${fullName} joined`)
-    
-            socket.on("send_comment",(msg)=>{
-                io.emit("receive_message",{comment:msg,user:fullName})
-            })
-        
-       
-    
-    });
