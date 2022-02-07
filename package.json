@@ -1,0 +1,32 @@
+{
+  "name": "fatcoder",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "keywords": [
+    "Assesseement",
+    "Backend",
+    "Javascript"
+  ],
+  "author": "Abiodun Michael",
+  "license": "ISC",
+  "dependencies": {
+    "@reduxjs/toolkit": "^1.7.1",
+    "axios": "^0.25.0",
+    "next": "^12.0.8",
+    "nextjs-progressbar": "^0.0.13",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-feather": "^2.0.9",
+    "react-hook-form": "^7.26.0",
+    "react-redux": "^7.2.6",
+    "react-toastify": "^8.1.0",
+    "socket.io-client": "^4.4.1"
+  }
+}
